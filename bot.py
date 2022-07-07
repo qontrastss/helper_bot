@@ -17,8 +17,7 @@ async def set_commands(bot: Bot):
     commands = [
         BotCommand(command="/kz", description="Казахский язык"),
         BotCommand(command="/ru", description="Русский язык"),
-        BotCommand(command="/cancel", description="Отменить текущее действие"),
-        BotCommand(command="/start", description="Запустить бота"),
+        BotCommand(command="/start", description="Запустить бота / Ботты іске қосу"),
     ]
     await bot.set_my_commands(commands)
 
@@ -47,7 +46,6 @@ async def main():
     await set_commands(bot)
 
     # Запуск поллинга
-    # await dp.skip_updates()  # пропуск накопившихся апдейтов (необязательно)
     await dp.start_polling()
 
 

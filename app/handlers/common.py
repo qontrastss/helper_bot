@@ -1,5 +1,5 @@
 from aiogram import Dispatcher, types
-from aiogram.dispatcher.filters import Text, IDFilter
+from aiogram.dispatcher.filters import Text
 from aiogram.types import KeyboardButton
 
 from app.handlers.kz import kz_start
@@ -26,8 +26,10 @@ async def answer_to_questions(message: types.Message):
 
 
 def register_handlers_common(dp: Dispatcher):
-    dp.register_message_handler(cmd_start, commands="start", state="*")
+    dp.register_message_handler(cmd_start, commands="start")
     dp.register_message_handler(kz_start, Text(equals="Қазақ 🇰🇿"))
     dp.register_message_handler(ru_start, Text(equals="Русский 🇷🇺"))
+    dp.register_message_handler(kz_start, Text(equals="⬅  Басты бетке оралу"))
+    dp.register_message_handler(ru_start, Text(equals="⬅ ️Вернуться на главную страницу"))
     dp.register_message_handler(answer_to_questions, Text(startswith="Q:"))
 
