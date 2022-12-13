@@ -2,13 +2,12 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
 import aiogram.utils.markdown as fmt
 from app.utils import questions_ru, available_options_ru
-
+from app.db import get_database
+collection_name = get_database()
 
 async def ru_start(message: types.Message):
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    for name in available_options_ru:
-        keyboard.add(name)
-    await message.answer("Выберите один из пунктов:", reply_markup=keyboard)
+    chat_id = collection_name.find({"chat_id" : message.from_id})
+    await message.answer("Для доступа к материалам курса, отправьте пожалуйста ваше имя:")
 
 
 async def seller_call_center_info(message: types.Message):
