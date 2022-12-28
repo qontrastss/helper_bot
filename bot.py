@@ -33,11 +33,13 @@ async def main():
     config = load_config("config/bot.ini")
 
     # Объявление и инициализация объектов бота и диспетчера
+
     bot = Bot(token=config.tg_bot.token)
+
     dp = Dispatcher(bot, storage=MemoryStorage())
 
     # Регистрация хэндлеров
-    register_handlers_common(dp)
+    register_handlers_common(dp, bot)
     # register_handlers_kz(dp)
     # register_handlers_ru(dp)
 
