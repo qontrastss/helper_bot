@@ -22,6 +22,6 @@ def load_config(path: str):
     return Config(
         tg_bot=TgBot(
             token=tg_bot["token"],
-            admin_id=int(tg_bot["admin_id"])
+            admin_id=int(tg_bot["admin1_id"])
         )
     )
