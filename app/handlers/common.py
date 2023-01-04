@@ -8,6 +8,8 @@ from app.utils import questions_ru, questions_kz
 from app.db import get_database
 from app.config_reader import load_config
 
+import re
+
 collection_name = get_database()
 global_bot = None
 config = load_config("config/bot.ini")
@@ -39,16 +41,19 @@ async def cmd_start(message: types.Message):
                     keyboard.add(name)
                 await message.answer("Уроки", reply_markup=keyboard)
             else:
-                collection_name.update_one({'_id': chat_id['_id']}, {"$set": {'phone': message.text}}, upsert=False)
-                await global_bot.send_message(config.tg_bot.admin1_id, f"Данные нового пользователя бота:\nИмя: {chat_id['full_name']}\nНомер: {message.text}")
-                await global_bot.send_message(config.tg_bot.admin2_id,
-                                              f"Данные нового пользователя бота:\nИмя: {chat_id['full_name']}\nНомер: {message.text}")
-                await global_bot.send_message(config.tg_bot.admin3_id,
-                                              f"Данные нового пользователя бота:\nИмя: {chat_id['full_name']}\nНомер: {message.text}")
-                keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                for name in list(lessons_dict.keys()):
-                    keyboard.add(name)
-                await message.answer("Уроки", reply_markup=keyboard)
+                if not re.match("^\+77\d{9}$", message.text):
+                    await message.answer("Ошибка, введите номер телефона согласно шаблону: +77XXXXXXXXX")
+                else:
+                    collection_name.update_one({'_id': chat_id['_id']}, {"$set": {'phone': message.text}}, upsert=False)
+                    await global_bot.send_message(config.tg_bot.admin1_id, f"Данные нового пользователя бота:\nИмя: {chat_id['full_name']}\nНомер: {message.text}")
+                    await global_bot.send_message(config.tg_bot.admin2_id,
+                                                  f"Данные нового пользователя бота:\nИмя: {chat_id['full_name']}\nНомер: {message.text}")
+                    await global_bot.send_message(config.tg_bot.admin3_id,
+                                                  f"Данные нового пользователя бота:\nИмя: {chat_id['full_name']}\nНомер: {message.text}")
+                    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                    for name in list(lessons_dict.keys()):
+                        keyboard.add(name)
+                    await message.answer("Уроки", reply_markup=keyboard)
         else:
             collection_name.update_one({'_id': chat_id['_id']}, {"$set": {'full_name': message.text}}, upsert=False)
             await message.answer("Ваш номер: ")
