@@ -77,7 +77,7 @@ async def lessons(message: types.Message):
                 await message.answer(url)
             await message.answer(lessons_dict[message.text]["description"], reply_markup=keyboard)
         else:
-            await message.answer("Ошибка!")
+            await message.answer("Ошибка!", reply_markup=keyboard)
     else:
         await message.answer("Сперва вы должны заполнить ваши данные!")
 
