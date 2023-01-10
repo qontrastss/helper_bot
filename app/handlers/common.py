@@ -41,8 +41,8 @@ async def cmd_start(message: types.Message):
                     keyboard.add(name)
                 await message.answer("Уроки", reply_markup=keyboard)
             else:
-                if not re.match("^\+77\d{9}$", message.text):
-                    await message.answer("Ошибка, введите номер телефона согласно шаблону: +77XXXXXXXXX")
+                if not re.match("^(\+77\d{9}|87\d{9})$", message.text):
+                    await message.answer("Ошибка, введите номер телефона согласно шаблону: +77XXXXXXXXX или 87XXXXXXXXX")
                 else:
                     collection_name.update_one({'_id': chat_id['_id']}, {"$set": {'phone': message.text}}, upsert=False)
                     await global_bot.send_message(config.tg_bot.admin1_id, f"Данные нового пользователя бота:\nИмя: {chat_id['full_name']}\nНомер: {message.text}")
