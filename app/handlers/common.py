@@ -7,6 +7,7 @@ from app.handlers.ru import ru_start
 from app.utils import questions_ru, questions_kz
 from app.db import get_database
 from app.config_reader import load_config
+from app.lessons import lessons, course_titles
 
 import re
 
@@ -14,21 +15,7 @@ collection_name = get_database()
 global_bot = None
 config = load_config("config/bot.ini")
 
-lessons_dict = {
-    'Урок 1: Вводное видео': {"url": "https://drive.google.com/file/d/1nSzvSQE_MncxZHzkXct7wXZRSk5IE3Gf/view?usp=share_link",
-               "description": f"Вводное видео\n\nГосударство оказывает фермерам поддержку в виде субсидий. Посмотри видео о том, что такое субсидии, кто их может получать и что для этого нужно сделать.\nДля тех, кто желает получить подробную информацию по всем мерам государственной поддержки с обратной связью от эксперта, доступен платный курс"},
-    'Урок 2: Подготовка документов': {"url": "https://drive.google.com/file/d/1MkUAUGI7I8GKJnJpSyOAUeVf2ss0rkEw/view?usp=share_link",
-               "description": f"Подготовка документов\n\nПодготовка документов – неотъемлемая часть процесса подачи заявок на субсидии. Именно документы подтверждают основание для получения субсидии. Посмотри видео и узнай, какие основные требования предъявляются к документам.\nДокументоведение – это целая наука, поэтому на полном курсе данной теме отведен целый урок, где вы подробно узнаете все тонкости по подготовке пакета документов."},
-    'Урок 3: Оцифровка': {"url": "https://drive.google.com/file/d/1-og30LAoG_ou3CQ8W_GKiBgHVQmlyM5w/view?usp=share_link",
-               "description": f"Оцифровка\n\nДля получения субсидий по направлению растениеводства необходимо наличие земельных угодий, которые оцифрованы. Что нужно знать при оцифровке и угодий и создании севооборотов, посмотри в видео.\nЕсли ты желаешь на живом примере увидеть, как оцифровывается земельное угодье, получить обратную связь от эксперта по своему хозяйству, запишись на полный курс."},
-    'Урок 4: Расчет суммы': {"url": "https://drive.google.com/file/d/1vnuYJy0FQVTKDWBFPGARFjx571tUyb5G/view?usp=share_link",
-               "description": f"Расчет суммы\n\nСумма субсидий, которую может получить фермер, зависит от множества факторов. Часто бывает так, что фермер планирует одну сумму, а фактически получает другую.  Что влияет на сумму субсидий посмотри в видео.\nМатематические расчеты и формулы порой написаны очень сложно, на полном курсе мы рассказываем простым языком о сложном, ты с легкостью сможешь посчитать сколько субсидий может получить твоя организация, также ты получишь обратную связь от эксперта для этого пройди полный курс с сопровождением."},
-    'Урок 5: Подача заявки': {"url": "https://drive.google.com/file/d/1ISS2uH5AnYXDuNB-X4D_DXG5g8_GUHOc/view?usp=share_link",
-               "description": f"Подача заявки\n\nПодача заявки – легкий процесс, если вы знаете основные этапы и уже подготовили всю необходимую информацию. Остается только внести данные из документов в заявку и прикрепить необходимый пакет документов. Как это сделать правильно смотри в видео.\nНа полном курсе мы разбираем подробно каждое направление субсидирования (удобрения, семена, пестициды, ставка вознаграждения, инвестиционные субсидии и т.д) с учетом всех нюансов, которые могут появиться, также все обучающиеся получают обратную связь от эксперта по любому вопросу, который касается субсидирования, для этого пройди полный курс."},
-    'Урок 6: Заключительное видео': {"url": "https://drive.google.com/file/d/12MrxGH6W_Gwm1TobilaSWOR-ilPc4Wr4/view?usp=share_link",
-               "description": f"Заключительное видео\n\nВажно помнить, что субсидии – это не спасательный круг, а приятный кэшбэк или бонус для успешной компании. Посмотри видео о том, что влияет на успех в получении субсидий.\n«Кадры решают все!» - эта фраза актуальна в любое время, а квалифицированные кадры тем более. С помощью наших курсов вы повысите уровень ваших специалистов, что позволит выйти на новый уровень доходности. Выбери свой курс и повысь уровень своих знаний!"},
-    'Купить полный курс': {'description': 'Чтобы получить доступ к полному курсу, можете написать Динаре: @dinara_moldagaipova'}
-}
+
 
 async def cmd_start(message: types.Message):
     chat_id = collection_name.find_one({"chat_id": message.chat.id})
@@ -37,9 +24,9 @@ async def cmd_start(message: types.Message):
         if chat_id['full_name']:
             if chat_id['phone']:
                 keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                for name in list(lessons_dict.keys()):
-                    keyboard.add(name)
-                await message.answer("Уроки", reply_markup=keyboard)
+                for course_title in course_titles:
+                    keyboard.add(course_title)
+                await message.answer("Курсы", reply_markup=keyboard)
             else:
                 if not re.match("^(\+77\d{9}|87\d{9})$", message.text):
                     await message.answer("Ошибка, введите номер телефона согласно шаблону: +77XXXXXXXXX или 87XXXXXXXXX")
@@ -51,9 +38,9 @@ async def cmd_start(message: types.Message):
                     await global_bot.send_message(config.tg_bot.admin3_id,
                                                   f"Данные нового пользователя бота:\nИмя: {chat_id['full_name']}\nНомер: {message.text}")
                     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                    for name in list(lessons_dict.keys()):
-                        keyboard.add(name)
-                    await message.answer("Уроки", reply_markup=keyboard)
+                    for course_title in course_titles:
+                        keyboard.add(course_title)
+                    await message.answer("Курсы", reply_markup=keyboard)
         else:
             collection_name.update_one({'_id': chat_id['_id']}, {"$set": {'full_name': message.text}}, upsert=False)
             await message.answer("Ваш номер: ")
@@ -64,35 +51,60 @@ async def cmd_start(message: types.Message):
         await message.answer("Ваше имя: ")
 
 
-async def lessons(message: types.Message):
-    chat_id = collection_name.find_one({"chat_id": message.chat.id})
+async def get_lesson(message: types.Message):
+    founded = False
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    for name in list(lessons_dict.keys()):
-        keyboard.add(name)
-
+    chat_id = collection_name.find_one({"chat_id": message.chat.id})
     if chat_id:
-        if message.text in lessons_dict.keys():
-            url = lessons_dict[message.text].get("url", None)
+        for lesson in lessons:
+            if lesson['title'] == message.text:
+                course_type = lesson['course_type']
+                url = lesson.get("url")
+                description = lesson.get("description")
+                founded = True
+                break
+        else:
+            keyboard.add('Вернуться к выбору курсов ↩️')
+            await message.answer("Ошибка!", reply_markup=keyboard)
+
+        if founded:
+            for lesson in lessons:
+                if course_type == lesson['course_type'] or lesson['course_type'] == 'Общий':
+                    keyboard.add(lesson['title'])
             if url:
                 await message.answer(url)
-            await message.answer(lessons_dict[message.text]["description"], reply_markup=keyboard)
-        else:
-            await message.answer("Ошибка!", reply_markup=keyboard)
+            await message.answer(description, reply_markup=keyboard)
     else:
         await message.answer("Сперва вы должны заполнить ваши данные!")
 
-# async def answer_to_questions(message: types.Message):
-#     if message.text in list(questions_ru.keys()):
-#         await message.answer(questions_ru[message.text])
-#     if message.text in list(questions_kz.keys()):
-#         await message.answer(questions_kz[message.text])
+
+async def get_courses(message: types.Message):
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    for lesson in lessons:
+        if message.text == lesson['course_type'] or lesson['course_type'] == 'Общий':
+            keyboard.add(lesson['title'])
+
+    await message.answer("Уроки", reply_markup=keyboard)
+
+
+async def courses_list(message: types.Message):
+    chat_id = collection_name.find_one({"chat_id": message.chat.id})
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    for course_title in course_titles:
+        keyboard.add(course_title)
+    if chat_id:
+        await message.answer("Курсы", reply_markup=keyboard)
+    else:
+        await message.answer("Сперва вы должны заполнить ваши данные!")
 
 
 def register_handlers_common(dp: Dispatcher, bot):
     global global_bot
     global_bot = bot
-    dp.register_message_handler(lessons, Text(equals="Купить полный курс"))
-    dp.register_message_handler(lessons, Text(startswith="Урок"))
+    dp.register_message_handler(get_lesson, Text(equals="Купить полный курс 💵"))
+    dp.register_message_handler(courses_list, Text(equals="Вернуться к выбору курсов ↩️"))
+    dp.register_message_handler(get_lesson, Text(startswith="Урок"))
+    dp.register_message_handler(get_courses, Text(startswith="Курсы"))
     dp.register_message_handler(cmd_start)
 
     # dp.register_message_handler(kz_start, Text(equals="Қазақ 🇰🇿"))
