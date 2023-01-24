@@ -16,8 +16,20 @@ global_bot = None
 config = load_config("config/bot.ini")
 
 
+async def check_sent_phones():
+    not_sent_phones = collection_name.find({"chat_id": {"$exists": False}, "phone": {"$exists": True}, "sent": {"$exists": False}})
+    for not_sent_phone in not_sent_phones:
+        collection_name.update_one({'_id': not_sent_phone['_id']}, {"$set": {'sent': True}}, upsert=False)
+        await global_bot.send_message(config.tg_bot.admin1_id,
+                                      f"Данные нового пользователя сайта:\nНомер: {not_sent_phone['phone']}")
+        await global_bot.send_message(config.tg_bot.admin2_id,
+                                      f"Данные нового пользователя сайта:\nНомер: {not_sent_phone['phone']}")
+        await global_bot.send_message(config.tg_bot.admin3_id,
+                                      f"Данные нового пользователя сайта:\nНомер: {not_sent_phone['phone']}")
+
 
 async def cmd_start(message: types.Message):
+    await check_sent_phones()
     chat_id = collection_name.find_one({"chat_id": message.chat.id})
 
     if chat_id:
@@ -52,6 +64,7 @@ async def cmd_start(message: types.Message):
 
 
 async def get_lesson(message: types.Message):
+    await check_sent_phones()
     founded = False
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     chat_id = collection_name.find_one({"chat_id": message.chat.id})
@@ -79,6 +92,7 @@ async def get_lesson(message: types.Message):
 
 
 async def get_courses(message: types.Message):
+    await check_sent_phones()
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for lesson in lessons:
         if message.text == lesson['course_type'] or lesson['course_type'] == 'Общий':
@@ -88,6 +102,7 @@ async def get_courses(message: types.Message):
 
 
 async def courses_list(message: types.Message):
+    await check_sent_phones()
     chat_id = collection_name.find_one({"chat_id": message.chat.id})
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for course_title in course_titles:
