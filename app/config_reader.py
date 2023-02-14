@@ -8,6 +8,7 @@ class TgBot:
     admin1_id: int
     admin2_id: int
     admin3_id: int
+    admin4_id: int
 
 
 @dataclass
@@ -27,5 +28,6 @@ def load_config(path: str):
             admin1_id=int(tg_bot["admin1_id"]),
             admin2_id=int(tg_bot["admin2_id"]),
             admin3_id=int(tg_bot["admin3_id"]),
+            admin4_id=int(tg_bot["admin4_id"]),
         )
     )

@@ -26,6 +26,8 @@ async def check_sent_phones():
                                       f"Данные нового пользователя сайта:\nНомер: {not_sent_phone['phone']}")
         await global_bot.send_message(config.tg_bot.admin3_id,
                                       f"Данные нового пользователя сайта:\nНомер: {not_sent_phone['phone']}")
+        await global_bot.send_message(config.tg_bot.admin4_id,
+                                      f"Данные нового пользователя сайта:\nНомер: {not_sent_phone['phone']}")
 
 
 async def cmd_start(message: types.Message):
@@ -48,6 +50,8 @@ async def cmd_start(message: types.Message):
                     await global_bot.send_message(config.tg_bot.admin2_id,
                                                   f"Данные нового пользователя бота:\nИмя: {chat_id['full_name']}\nНомер: {message.text}")
                     await global_bot.send_message(config.tg_bot.admin3_id,
+                                                  f"Данные нового пользователя бота:\nИмя: {chat_id['full_name']}\nНомер: {message.text}")
+                    await global_bot.send_message(config.tg_bot.admin4_id,
                                                   f"Данные нового пользователя бота:\nИмя: {chat_id['full_name']}\nНомер: {message.text}")
                     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
                     for course_title in course_titles:
@@ -113,6 +117,26 @@ async def courses_list(message: types.Message):
         await message.answer("Сперва вы должны заполнить ваши данные!")
 
 
+async def send_mailing(message: types.Message):
+    await check_sent_phones()
+    admins = [config.tg_bot.admin1_id, config.tg_bot.admin2_id, config.tg_bot.admin3_id, config.tg_bot.admin4_id]
+    if message.chat.id in admins:
+        text = message.text.split('mailing:')
+        if len(text) > 1:
+            send_text = text[1]
+            telegram_users = collection_name.find(
+                {"chat_id": {"$exists": True}})
+            for telegram_user in telegram_users:
+                try:
+                    await global_bot.send_message(telegram_user['chat_id'], send_text)
+                except Exception as err:
+                    print(err)
+
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    for course_title in course_titles:
+        keyboard.add(course_title)
+    await message.answer("Курсы", reply_markup=keyboard)
+
 def register_handlers_common(dp: Dispatcher, bot):
     global global_bot
     global_bot = bot
@@ -120,11 +144,5 @@ def register_handlers_common(dp: Dispatcher, bot):
     dp.register_message_handler(courses_list, Text(equals="Вернуться к выбору курсов ↩️"))
     dp.register_message_handler(get_lesson, Text(startswith="Урок"))
     dp.register_message_handler(get_courses, Text(startswith="Курсы"))
+    dp.register_message_handler(send_mailing, Text(startswith="mailing:"))
     dp.register_message_handler(cmd_start)
-
-    # dp.register_message_handler(kz_start, Text(equals="Қазақ 🇰🇿"))
-    # dp.register_message_handler(ru_start, Text(equals="Русский 🇷🇺"))
-    # dp.register_message_handler(kz_start, Text(equals="⬅  Басты бетке оралу"))
-    # dp.register_message_handler(ru_start, Text(equals="⬅ ️Вернуться на главную страницу"))
-    # dp.register_message_handler(answer_to_questions, Text(startswith="Q:"))
-
