@@ -129,6 +129,14 @@ async def send_mailing(message: types.Message):
             for telegram_user in telegram_users:
                 try:
                     await global_bot.send_message(telegram_user['chat_id'], send_text)
+                    if message.photo:
+                        await global_bot.send_photo(telegram_user['chat_id'], message.photo[-1].file_id)
+                    if message.audio:
+                        await global_bot.send_audio(telegram_user['chat_id'], message.audio.file_id)
+                    if message.document:
+                        await global_bot.send_document(telegram_user['chat_id'], message.document.file_id)
+                    if message.video:
+                        await global_bot.send_video(telegram_user['chat_id'], message.video.file_id)
                 except Exception as err:
                     print(err)
 
@@ -136,6 +144,7 @@ async def send_mailing(message: types.Message):
     for course_title in course_titles:
         keyboard.add(course_title)
     await message.answer("Курсы", reply_markup=keyboard)
+
 
 def register_handlers_common(dp: Dispatcher, bot):
     global global_bot
@@ -145,4 +154,5 @@ def register_handlers_common(dp: Dispatcher, bot):
     dp.register_message_handler(get_lesson, Text(startswith="Урок"))
     dp.register_message_handler(get_courses, Text(startswith="Курсы"))
     dp.register_message_handler(send_mailing, Text(startswith="mailing:"))
+    dp.register_message_handler(send_mailing, content_types = ['document', 'photo', 'audio', 'video'])
     dp.register_message_handler(cmd_start)
